@@ -1,4 +1,4 @@
-# Face Recognition App
+# Image Recognition App
 
 Working project of Image Recognition App
 
