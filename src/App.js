@@ -13,17 +13,20 @@ import './App.css';
 
 const app = new Clarifai.App({
   // Enter your own Clarifai API Key to use the API
-  apiKey: ''
+  apiKey: 'd02594fdb23244cb98f6b927942ee87c'
 });
 
 const particlesOptions = {
   particles: {
     number: {
-      value: 100,
+      value: 120,
       density: {
         enable: true,
         value_area: 700
       }
+    },
+    move: {
+      speed: 0.5
     }
   }
 }
@@ -36,8 +39,27 @@ class App extends React.Component {
       imageURL: '',
       boxes: {},
       route: 'signin',
-      isSignedIn: false
+      isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     }
+  }
+
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    })
   }
 
   calculateFaceLocation = (data) => {
@@ -72,12 +94,31 @@ class App extends React.Component {
     this.setState({ input: event.target.value });
   }
 
-  onButtonSubmit = () => {
+  onImageSubmit = () => {
     this.setState({ imageURL: this.state.input });
     app.models.predict(
       Clarifai.FACE_DETECT_MODEL,
       this.state.input)
       .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(
+                Object.assign( //target object, update it with this info.
+                  this.state.user, {
+                  entries: count
+                }))
+            })
+        }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
       .catch(err => console.log(err));
@@ -93,7 +134,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { isSignedIn, imageURL, route, boxes } = this.state;
+    const { isSignedIn, imageURL, route, boxes, user } = this.state;
     return (
       <div className="App">
         <Particles
@@ -104,20 +145,20 @@ class App extends React.Component {
         {route === 'home'
           ? <div>
             <Logo />
-            <Rank />
+            <Rank name={user.name} entries={user.entries} />
             <ImageInputForm
               onInputChange={this.onInputChange}
-              onButtonSubmit={this.onButtonSubmit}
+              onImageSubmit={this.onImageSubmit}
             />
             <FaceRecognition boxes={boxes} imageURL={imageURL} />
           </div>
           : (
             route === 'signin'
-              ? <Signin onRouteChange={this.onRouteChange} />
+              ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
               : (
                 route === 'signout'
-                  ? <Signin onRouteChange={this.onRouteChange} />
-                  : <Register onRouteChange={this.onRouteChange} />
+                  ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+                  : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
               )
           )
         }
