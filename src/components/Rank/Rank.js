@@ -1,7 +1,8 @@
 import React from 'react';
 
-const Rank = ({ name, entries }) => {
-  return (
+const Rank = ({ name, entries, isSignedIn }) => {
+  if (isSignedIn) {
+    return (
     <div>
       <div className="white f2">
         {`${name}, your current detection count is...`}
@@ -11,6 +12,12 @@ const Rank = ({ name, entries }) => {
       </div>
     </div>
   );
+  } else {
+    return (
+      <div className="f1">Welcome to Smart Image Recognition!</div>
+    );
+  }
+  
 }
 
 export default Rank;

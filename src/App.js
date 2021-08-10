@@ -38,7 +38,7 @@ class App extends React.Component {
       input: '',
       imageURL: '',
       boxes: {},
-      route: 'signin',
+      route: 'home',
       isSignedIn: false,
       user: {
         id: '',
@@ -125,12 +125,16 @@ class App extends React.Component {
   }
 
   onRouteChange = (route) => {
-    if (route === 'signout') {
-      this.setState({ isSignedIn: false });
-    } else if (route === 'home') {
-      this.setState({ isSignedIn: true });
-    }
+    // if (route === 'signout') {
+    //   this.setState({ isSignedIn: false });
+    // } else if (route === 'home') {
+    //   this.setState({ isSignedIn: true });
+    // }
     this.setState({ route: route });
+  }
+
+  userSignedIn = (status) => {
+    this.setState({ isSignedIn: status });
   }
 
   render() {
@@ -141,27 +145,55 @@ class App extends React.Component {
           className='particles'
           params={particlesOptions}
         />
-        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
-        {route === 'home'
+        <Navigation isSignedIn={isSignedIn} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+        <Logo onRouteChange={this.onRouteChange} />
+        {(route === 'home') &&
+          <div>
+            <Rank isSignedIn={isSignedIn} name={user.name} entries={user.entries} />
+            <ImageInputForm
+              isSignedIn={isSignedIn}
+              onInputChange={this.onInputChange}
+              onImageSubmit={this.onImageSubmit}
+            />
+            {(isSignedIn) && <FaceRecognition boxes={boxes} imageURL={imageURL} />}
+          </div>
+        }
+        {(route === 'signin') &&
+          <Signin loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+        }
+        {(route === 'signout') &&
+          <Signin loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+        }
+        {(route === 'register') &&
+          <Register loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+        }
+
+        {/* {(route === 'signin'
+          ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+          : (route === 'signout'
+            ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+            : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+          )
+        )} */}
+        {/* {route === 'home'
           ? <div>
             <Logo />
-            <Rank name={user.name} entries={user.entries} />
+            <Rank isSignedIn={isSignedIn} name={user.name} entries={user.entries} />
             <ImageInputForm
+              isSignedIn={isSignedIn}
               onInputChange={this.onInputChange}
               onImageSubmit={this.onImageSubmit}
             />
             <FaceRecognition boxes={boxes} imageURL={imageURL} />
           </div>
-          : (
-            route === 'signin'
+          : (route === 'signin'
+            ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+            : (route === 'signout'
               ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
-              : (
-                route === 'signout'
-                  ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
-                  : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
-              )
+              : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+            )
           )
-        }
+        } */}
       </div>
     );
   }
