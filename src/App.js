@@ -7,14 +7,7 @@ import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import Signin from './components/Signin/Signin';
 import Register from './components/Register/Register';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 import './App.css';
-
-
-const app = new Clarifai.App({
-  // Enter your own Clarifai API Key to use the API
-  apiKey: 'd02594fdb23244cb98f6b927942ee87c'
-});
 
 const particlesOptions = {
   particles: {
@@ -31,23 +24,25 @@ const particlesOptions = {
   }
 }
 
+const initialState = {
+  input: '',
+  imageURL: '',
+  boxes: {},
+  route: 'home',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    joined: ''
+  }
+}
+
 class App extends React.Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageURL: '',
-      boxes: {},
-      route: 'home',
-      isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: ''
-      }
-    }
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -96,9 +91,16 @@ class App extends React.Component {
 
   onImageSubmit = () => {
     this.setState({ imageURL: this.state.input });
-    app.models.predict(
-      Clarifai.FACE_DETECT_MODEL,
-      this.state.input)
+    fetch('http://localhost:3000/imageurl', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+      .then(response => response.json())
       .then(response => {
         if (response) {
           fetch('http://localhost:3000/image', {
@@ -117,7 +119,7 @@ class App extends React.Component {
                   this.state.user, {
                   entries: count
                 }))
-            })
+            }).catch(console.log)
         }
         this.displayFaceBox(this.calculateFaceLocation(response));
       })
@@ -125,11 +127,9 @@ class App extends React.Component {
   }
 
   onRouteChange = (route) => {
-    // if (route === 'signout') {
-    //   this.setState({ isSignedIn: false });
-    // } else if (route === 'home') {
-    //   this.setState({ isSignedIn: true });
-    // }
+    if (route === 'signout') {
+      this.setState(initialState);
+    }
     this.setState({ route: route });
   }
 
@@ -145,7 +145,7 @@ class App extends React.Component {
           className='particles'
           params={particlesOptions}
         />
-        <Navigation isSignedIn={isSignedIn} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+        <Navigation isSignedIn={isSignedIn} userSignedIn={this.userSignedIn} onRouteChange={this.onRouteChange} />
         <Logo onRouteChange={this.onRouteChange} />
         {(route === 'home') &&
           <div>
@@ -159,13 +159,13 @@ class App extends React.Component {
           </div>
         }
         {(route === 'signin') &&
-          <Signin loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+          <Signin loadUser={this.loadUser} userSignedIn={this.userSignedIn} onRouteChange={this.onRouteChange} />
         }
         {(route === 'signout') &&
-          <Signin loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+          <Signin loadUser={this.loadUser} userSignedIn={this.userSignedIn} onRouteChange={this.onRouteChange} />
         }
         {(route === 'register') &&
-          <Register loadUser={this.loadUser} userSignedIn = {this.userSignedIn} onRouteChange={this.onRouteChange} />
+          <Register loadUser={this.loadUser} userSignedIn={this.userSignedIn} onRouteChange={this.onRouteChange} />
         }
 
         {/* {(route === 'signin'
