@@ -1,26 +1,71 @@
 import React from 'react';
 
-class Register extends React.Component {
+const Regex = RegExp(/^\s?[A-Z0–9]+[A-Z0–9._+-]{0,}@[A-Z0–9._+-]+\.[A-Z0–9]{2,4}\s?$/i);
+
+interface SignUpProps {
+  name?: any;
+  value?: any;
+}
+interface SignUpState {
+  name: string,
+  email: string,
+  password: string,
+  errors: {
+    name: string,
+    email: string,
+    password: string
+  }
+}
+
+class Register extends React.Component<SignUpProps, SignUpState> {
   constructor(props) {
     super(props);
-    this.state = {
+    const initialState = {
       name: '',
       email: '',
-      password: ''
+      password: '',
+      errors: {
+        name: '',
+        email: '',
+        password: ''
+      }
     }
+    this.state = initialState;
+    this.handleChange = this.handleChange.bind(this);
   }
 
-  onNameChange = (event) => {
-    this.setState({ name: event.target.value })
+  handleChange = (event) => {
+    event.preventDefault();
+    const { name, value } = event.target;
+    let errors = this.state.errors;
+    switch (name) {
+      case 'name':
+        errors.name = value.length < 2 ? 'Name must be at least 2 characters long!' : '';
+        break;
+      case 'email':
+        errors.email = Regex.test(value) ? '' : 'Email is not valid!';
+        break;
+      case 'password':
+        errors.password = value.length < 8 ? 'Password must be eight characters long!' : '';
+        break;
+      default:
+        break;
+    }
+    this.setState(Object.assign(this.state, { errors, [name]: value }));
   }
 
-  onEmailChange = (event) => {
-    this.setState({ email: event.target.value })
-  }
-
-  onPasswordChange = (event) => {
-    this.setState({ password: event.target.value })
-  }
+  handleSubmit = (event) => {
+    event.preventDefault();
+    let validity = true;
+    Object.values(this.state.errors).forEach(
+      (val) => val.length > 0 && (validity = false)
+    );
+    if(validity === true){
+       this.onSubmitRegister();
+    }else{
+       alert("Please fill out every information needed");
+    }
+ }
 
   onSubmitRegister = () => {
     fetch('http://localhost:3000/register', {
@@ -39,13 +84,15 @@ class Register extends React.Component {
         if (user) {
           this.props.loadUser(user);
           this.props.onRouteChange('home');
+          this.props.userSignedIn(true);
         }
       })
   }
 
   render() {
+    const {errors} = this.state;
     return (
-      <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-2 center">
+      <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-2 bg-washed-blue center">
         <main className="pa4 black-80">
           <div className="measure">
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
@@ -53,27 +100,45 @@ class Register extends React.Component {
               <div className="mt3">
                 <label className="db fw6 lh-copy f5" htmlFor="name">Name</label>
                 <input
-                  onChange={this.onNameChange}
-                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="text" name="name" id="name" />
+                  onChange={this.handleChange}
+                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
+                  type="text"
+                  name="name"
+                  id="name"
+                />
+                {errors.name.length > 0 &&  <span style={{color: "red"}}>{errors.name}</span>}
               </div>
               <div className="mt3">
-                <label className="db fw6 lh-copy f5" htmlFor="email-address">Email</label>
+                <label className="db fw6 lh-copy f5" htmlFor="email">Email</label>
                 <input
-                  onChange={this.onEmailChange}
-                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address" id="email-address" />
+                  onChange={this.handleChange}
+                  className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
+                  type="email"
+                  name="email"
+                  id="email"
+                />
+                {errors.email.length > 0 &&  <span style={{color: "red"}}>{errors.email}</span>}
               </div>
               <div className="mv3">
                 <label className="db fw6 lh-copy f5" htmlFor="password">Password</label>
                 <input
-                  onChange={this.onPasswordChange}
-                  className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password" id="password" />
+                  onChange={this.handleChange}
+                  className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100"
+                  type="password"
+                  name="password"
+                  id="password"
+                />
+                {errors.password.length > 0 &&  <span style={{color: "red"}}>{errors.password}</span>}
               </div>
-              {/* <label className="pa0 ma0 lh-copy f6 pointer"><input type="checkbox" /> Remember me</label> */}
             </fieldset>
             <div className="">
               <input
-                onClick={this.onSubmitRegister} //only when onClick happens instead of each rendering
-                className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f5 dib" type="submit" value="Register" />
+                onClick={this.handleSubmit} //only when onClick happens instead of each rendering
+                noValidate
+                className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f5 dib"
+                type="submit"
+                value="Register"
+              />
             </div>
             <div className="lh-copy mt3">
             </div>
