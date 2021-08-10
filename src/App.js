@@ -155,7 +155,7 @@ class App extends React.Component {
               onInputChange={this.onInputChange}
               onImageSubmit={this.onImageSubmit}
             />
-            <FaceRecognition boxes={boxes} imageURL={imageURL} />
+            {(isSignedIn) && <FaceRecognition boxes={boxes} imageURL={imageURL} />}
           </div>
         }
         {(route === 'signin') &&
