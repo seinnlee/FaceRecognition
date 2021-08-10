@@ -81,7 +81,7 @@ class Register extends React.Component<SignUpProps, SignUpState> {
     })
       .then(response => response.json()) //the response is not JSON 
       .then(user => {
-        if (user) {
+        if (user.id) {
           this.props.loadUser(user);
           this.props.onRouteChange('home');
           this.props.userSignedIn(true);
