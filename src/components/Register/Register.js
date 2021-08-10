@@ -68,7 +68,7 @@ class Register extends React.Component<SignUpProps, SignUpState> {
  }
 
   onSubmitRegister = () => {
-    fetch('http://localhost:3000/register', {
+    fetch('https://arcane-sierra-67660.herokuapp.com/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
