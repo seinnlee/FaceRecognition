@@ -2,22 +2,7 @@ import React from 'react';
 
 const Regex = RegExp(/^\s?[A-Z0–9]+[A-Z0–9._+-]{0,}@[A-Z0–9._+-]+\.[A-Z0–9]{2,4}\s?$/i);
 
-interface SignUpProps {
-  name?: any;
-  value?: any;
-}
-interface SignUpState {
-  name: string,
-  email: string,
-  password: string,
-  errors: {
-    name: string,
-    email: string,
-    password: string
-  }
-}
-
-class Register extends React.Component<SignUpProps, SignUpState> {
+class Register extends React.Component {
   constructor(props) {
     super(props);
     const initialState = {
